@@ -1,0 +1,13 @@
+# Build image for `just build-static`: Alpine (musl) GHC plus the static C
+# libraries the project links against.
+#
+# Keep the GHC version in sync with ghcVersion in flake.nix.
+# "int-native": GHC built without GMP, so static binaries don't bundle the LGPL library.
+FROM docker.io/benz0li/ghc-musl:9.10.3-int-native@sha256:1fadde02e7ae3e5c97a751e97ea2dc89cc5d21d7e27ad247923887656515a522
+
+# C libraries for FFI: add each one's -dev (headers, pkg-config file) and -static
+# (.a archive) Alpine packages. Already in the base image: zlib, libffi, openssl,
+# curl, bzip2, ncurses, gmp.
+#
+# RUN apk add --no-cache \
+#     sqlite-dev sqlite-static

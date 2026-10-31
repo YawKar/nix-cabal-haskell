@@ -1,0 +1,43 @@
+cabal-version: 3.12
+name:          lib2
+version:       0.1.0.0
+license:       Unlicense
+synopsis:      Example library 2
+build-type:    Simple
+
+common common
+  default-language: GHC2024
+  ghc-options:
+    -Wall -Wcompat -Widentities -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
+    -Wredundant-constraints -Wunused-packages
+
+  build-depends:    base >=4.20 && <5
+
+library
+  import:          common
+  hs-source-dirs:  src
+  exposed-modules: Lib2
+  build-depends:   lib1
+
+test-suite lib2-test
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
+  ghc-options:    -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+    , hspec  ^>=2.11
+    , lib2
+
+benchmark lib2-bench
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: bench
+  main-is:        Main.hs
+
+  -- Larger allocation area and aligned code, as tasty-bench recommends for stable timings.
+  ghc-options:    -rtsopts -with-rtsopts=-A32m -fproc-alignment=64
+  build-depends:
+    , lib2
+    , tasty-bench  ^>=0.5

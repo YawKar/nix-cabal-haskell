@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A new push to the same branch or PR cancels the run in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    # Every `run` step executes inside the flake's lean CI shell.
+    defaults:
+      run:
+        shell: nix develop .#ci --command bash -euo pipefail {0}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Separate step so the toolchain download isn't counted against the first check.
+      - name: Prepare dev shell
+        run: |
+          ghc --version
+          cabal --version
+          # A fresh runner has no cabal config, and cabal's first run prints
+          # "Config file not found..." to stdout. Create it up front so
+          # `cabal path` prints only the path.
+          cabal user-config update > /dev/null
+          echo "store=$(cabal path --store-dir)" >> "$GITHUB_OUTPUT"
+        id: shell
+
+      - name: Format check
+        run: just format-check
+
+      - name: Lint
+        run: just lint
+
+      - name: Update Hackage index
+        run: cabal update
+
+      # Only the cabal store (compiled dependencies): the checkout resets file
+      # timestamps, so a cached dist-newstyle would be rebuilt anyway.
+      - name: Restore cabal store
+        id: cabal-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ steps.shell.outputs.store }}
+          key: cabal-store-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('flake.lock', 'cabal.project', 'cabal.project.freeze', '**/*.cabal') }}
+          restore-keys: cabal-store-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Build
+        run: just build
+
+      # Saved right after the build, so failing tests don't throw away the compiled dependencies.
+      - name: Save cabal store
+        if: steps.cabal-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ steps.shell.outputs.store }}
+          key: ${{ steps.cabal-cache.outputs.cache-primary-key }}
+
+      - name: Test
+        run: just test
+
+      - name: Coverage
+        run: just coverage
+
+      - name: Upload coverage report
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/html/
+
+      - name: Doctest
+        run: just doctest
+
+      - name: Docs
+        run: just docs
+
+      - name: Upload docs
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: haddocks
+          path: haddocks/

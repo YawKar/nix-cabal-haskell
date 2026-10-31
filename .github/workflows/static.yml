@@ -1,0 +1,62 @@
+name: Static binaries
+
+# Manual only: Actions tab → "Static binaries" → "Run workflow".
+on:
+  workflow_dispatch:
+    inputs:
+      executables:
+        description: Space-separated executable names (empty = all)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Static (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Compiled musl dependencies, kept apart from the dynamic build's cabal store.
+      - name: Restore static cabal store
+        id: cabal-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: dist-newstyle/static/cabal/store
+          key: static-store-${{ matrix.arch }}-${{ hashFiles('static/Containerfile', 'justfile', 'cabal.project', 'cabal.project.freeze', '**/*.cabal') }}
+          restore-keys: static-store-${{ matrix.arch }}-
+
+      # The build runs in an Alpine container, so only `just` is needed from Nix
+      # (taken from the flake's pinned nixpkgs instead of the whole dev shell).
+      - name: Build static executables
+        env:
+          EXECUTABLES: ${{ inputs.executables }}
+        run: |
+          read -ra exes <<< "$EXECUTABLES"
+          nix shell --inputs-from . nixpkgs#just --command just build-static "${exes[@]}"
+
+      - name: Save static cabal store
+        if: steps.cabal-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: dist-newstyle/static/cabal/store
+          key: ${{ steps.cabal-cache.outputs.cache-primary-key }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: static-linux-${{ matrix.arch }}
+          path: dist-static/

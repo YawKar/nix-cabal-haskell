@@ -1,0 +1,5 @@
+gitignore_excludes: true
+formatter:
+  type: basic
+  # Keep single blank lines between blocks (e.g. workflow steps).
+  retain_line_breaks_single: true

@@ -1,0 +1,2 @@
+# Write multi-line Haddock comments as `-- |` lines instead of `{- | -}` blocks.
+haddock-style: single-line

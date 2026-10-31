@@ -1,0 +1,10 @@
+packages:
+  bins/*/
+  libs/*/
+
+-- Pin the Hackage snapshot so dependency resolution is reproducible.
+-- Bump with `just bump-index`.
+index-state: 2026-10-31T19:04:53Z
+
+tests: True
+benchmarks: True
