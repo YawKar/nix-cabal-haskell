@@ -1,2 +1,41 @@
-# Write multi-line Haddock comments as `-- |` lines instead of `{- | -}` blocks.
+# Haskell formatting, following the Kowainik style guide where fourmolu can express it:
+# https://kowainik.github.io/posts/2019-02-06-style-guide
+# See all options with `fourmolu --print-defaults`.
+
+# 4-space indentation; `where` sits half-indented (2 spaces) on its own line.
+indentation: 4
+indent-wheres: false
+
+# Lines up to 90 characters; longer ones are broken automatically.
+column-limit: 90
+
+# Leading commas and arrows, so a line's indentation never depends on the
+# length of a name on the line above:
+#
+#   printQuestion
+#       :: Show a
+#       => Text
+#       -> IO ()
+comma-style: leading
+function-arrows: leading
+import-export-style: leading
+
+# Imports: packages first, then this package's own modules, each sorted.
+import-grouping: by-scope
+
+#   let x = ...
+#   in  ...
+in-style: left-align
+
 haddock-style: single-line
+
+# deriving stock (Show), never deriving stock Show
+single-deriving-parens: always
+
+# Operator precedence fourmolu can't look up itself (it needs it to lay out
+# multi-line chains like `player & #rect % #x .~ 10 & #velocityY .~ 0`).
+fixities:
+  - infixl 9 %
+  - infixl 8 ^.
+  - infixr 4 .~, %~
+  - infixl 1 &

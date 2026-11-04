@@ -81,7 +81,6 @@ For a new Hackage dependency, add it to `build-depends` and run `just freeze`.
 | cabal-install | 3.16.1 | build tool |
 | haskell-language-server | 2.13 | editor support |
 | fourmolu | 0.19 | Haskell formatter |
-| cabal-fmt | 0.1.12 | `.cabal` formatter |
 | hlint | 3.10 | Haskell linter |
 | doctest | 0.24 | runs `>>>` examples in comments |
 | nixfmt, statix | | Nix formatter and linter |
@@ -150,9 +149,7 @@ is set.
 ### `cabal-version`
 
 The `.cabal` files use `cabal-version: 3.12`. This is the version of the file
-format, not of cabal-install. 3.12 is also the newest format the pinned `cabal-fmt`
-can read, so only raise it when you need a newer format feature and every tool that
-reads `.cabal` files supports it.
+format, not of cabal-install.
 
 ## Git hooks
 

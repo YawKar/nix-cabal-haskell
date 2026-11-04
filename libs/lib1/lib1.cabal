@@ -5,12 +5,35 @@ license:       Unlicense
 synopsis:      Example library 1
 build-type:    Simple
 
+-- NOTE: Please, if you update something here you should go and update other `*.cabal` files as well as this 'common' section was meant to be common for all packages in this template.
 common common
   default-language: GHC2024
+
+  default-extensions:
+    -- different records can share a field like `rect`
+    DuplicateRecordFields
+    -- field names don't become top-level functions
+    NoFieldSelectors
+    -- update fields with optics labels (`player & #rect % #x .~ 10`)
+    OverloadedLabels
+    -- read fields with a dot (`player.rect.x`)
+    OverloadedRecordDot
+
   ghc-options:
-    -Wall -Wcompat -Widentities -Wincomplete-record-updates
-    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
-    -Wredundant-constraints -Wunused-packages
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-deriving-strategies
+    -Wredundant-constraints
+    -Wunused-packages
+    -Wmissing-export-lists
+    -Wpartial-fields
+    -Wmissing-import-lists
+    -Wprepositive-qualified-module
+    -fhide-source-paths
+    -freverse-errors
 
   build-depends:    base >=4.20 && <5
 
@@ -24,7 +47,10 @@ test-suite lib1-test
   type:           exitcode-stdio-1.0
   hs-source-dirs: test
   main-is:        Main.hs
-  ghc-options:    -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
   build-depends:
     , hspec  ^>=2.11
     , lib1
@@ -35,8 +61,11 @@ benchmark lib1-bench
   hs-source-dirs: bench
   main-is:        Main.hs
 
-  -- Larger allocation area and aligned code, as tasty-bench recommends for stable timings.
-  ghc-options:    -rtsopts -with-rtsopts=-A32m -fproc-alignment=64
+  ghc-options:
+    -rtsopts
+    -- Larger allocation area and aligned code, as tasty-bench recommends for stable timings.
+    -with-rtsopts=-A32m
+    -fproc-alignment=64
   build-depends:
     , lib1
     , tasty-bench  ^>=0.5

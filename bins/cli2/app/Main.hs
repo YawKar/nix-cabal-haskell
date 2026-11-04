@@ -1,9 +1,9 @@
 module Main (main) where
 
-import Lib1 (greet)
-import Lib2 (shout)
+import Lib1 qualified (greet)
+import Lib2 qualified (shout)
 
 main :: IO ()
 main = do
-    putStrLn (greet "cli2")
-    putStrLn (shout "cli2")
+    putStrLn (Lib1.greet "cli2")
+    putStrLn (Lib2.shout "cli2")

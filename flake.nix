@@ -53,7 +53,6 @@
             nixfmt
             yamlfmt
             fourmolu
-            haskellPackages.cabal-fmt
           ];
           linters = with pkgs; [
             statix

@@ -1,10 +1,11 @@
 module Main (main) where
 
-import Lib1 (greet)
-import Test.Hspec
+import Test.Hspec qualified as Hspec
+
+import Lib1 qualified (greet)
 
 main :: IO ()
-main = hspec $ do
-    describe "greet" $ do
-        it "greets by name" $
-            greet "world" `shouldBe` "Hello, world!"
+main = Hspec.hspec $ do
+    Hspec.describe "greet" $ do
+        Hspec.it "greets by name" $
+            Lib1.greet "world" `Hspec.shouldBe` "Hello, world!"

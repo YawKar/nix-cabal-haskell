@@ -17,8 +17,6 @@ format check="":
     yamlfmt {{ if check != "" { "-lint" } else { "" } }} .
     # just
     just --fmt {{ if check != "" { "--check" } else { "" } }}
-    # cabal
-    find {{ hs_dirs }} -type f -name "*.cabal" -exec cabal-fmt {{ if check != "" { "--check" } else { "--inplace" } }} {} +
     # haskell
     fourmolu --mode {{ if check != "" { "check" } else { "inplace" } }} {{ hs_dirs }}
 

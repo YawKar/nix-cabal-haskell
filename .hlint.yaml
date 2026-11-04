@@ -1,0 +1,33 @@
+# Project rules for hlint, on top of its built-in suggestions.
+# Docs: https://github.com/ndmitchell/hlint#customizing-the-hints
+
+# Every import is qualified, written after the module name:
+#
+#   import Data.Map.Strict qualified as Map
+#
+# so every name says where it comes from (`Map.insert`). The Prelude needs no
+# import, so its names stay unqualified. "**" matches any module name.
+#
+# Exception: the common optics operators may be imported unqualified, so
+# updates read `player & #rect % #x .~ 10` instead of `Optics.%`, `Optics..~`.
+# Anything else from Optics.Core is still used qualified.
+- modules:
+    - name: "**"
+      importStyle: qualified
+      qualifiedStyle: post
+    - name: Optics.Core
+      importStyle: explicitOrQualified
+      qualifiedStyle: post
+      only: ["%", "^.", ".~", "%~", "&"]
+
+# RecordWildCards (`Datum{..}`) binds or fills every field implicitly. List the
+# fields with NamedFieldPuns (`Datum{fieldOne, fieldTwo}`) or read them with a dot.
+- extensions:
+    - name: RecordWildCards
+      within: []
+
+# Partial functions crash on some inputs (`head []`). Use pattern matching,
+# Data.List.NonEmpty or the Maybe-returning versions instead.
+- functions:
+    - name: [head, tail, init, last, "!!", fromJust, read]
+      within: []

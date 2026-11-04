@@ -1,14 +1,15 @@
 module Main (main) where
 
-import Lib1 (greet)
-import Test.Tasty.Bench
+import Test.Tasty.Bench qualified as B
+
+import Lib1 qualified (greet)
 
 main :: IO ()
 main =
-    defaultMain
-        [ bgroup
+    B.defaultMain
+        [ B.bgroup
             "greet"
-            [ bench "short name" $ nf greet "world"
-            , bench "long name" $ nf greet (replicate 10000 'x')
+            [ B.bench "short name" $ B.nf Lib1.greet "world"
+            , B.bench "long name" $ B.nf Lib1.greet (replicate 10000 'x')
             ]
         ]

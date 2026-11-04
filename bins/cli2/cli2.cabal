@@ -5,12 +5,35 @@ license:       Unlicense
 synopsis:      Example executable 2
 build-type:    Simple
 
+-- NOTE: Please, if you update something here you should go and update other `*.cabal` files as well as this 'common' section was meant to be common for all packages in this template.
 common common
   default-language: GHC2024
+
+  default-extensions:
+    -- different records can share a field like `rect`
+    DuplicateRecordFields
+    -- field names don't become top-level functions
+    NoFieldSelectors
+    -- update fields with optics labels (`player & #rect % #x .~ 10`)
+    OverloadedLabels
+    -- read fields with a dot (`player.rect.x`)
+    OverloadedRecordDot
+
   ghc-options:
-    -Wall -Wcompat -Widentities -Wincomplete-record-updates
-    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
-    -Wredundant-constraints -Wunused-packages
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-deriving-strategies
+    -Wredundant-constraints
+    -Wunused-packages
+    -Wmissing-export-lists
+    -Wpartial-fields
+    -Wmissing-import-lists
+    -Wprepositive-qualified-module
+    -fhide-source-paths
+    -freverse-errors
 
   build-depends:    base >=4.20 && <5
 
@@ -18,7 +41,10 @@ executable cli2
   import:         common
   hs-source-dirs: app
   main-is:        Main.hs
-  ghc-options:    -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
   build-depends:
     , lib1
     , lib2
