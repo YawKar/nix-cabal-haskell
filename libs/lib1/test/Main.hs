@@ -1,11 +1,15 @@
 module Main (main) where
 
-import Test.Hspec qualified as Hspec
+import Test.Hspec qualified as H
 
-import Lib1 qualified (greet)
+import Lib1 qualified (Person (Person), greet, withName)
 
 main :: IO ()
-main = Hspec.hspec $ do
-    Hspec.describe "greet" $ do
-        Hspec.it "greets by name" $
-            Lib1.greet "world" `Hspec.shouldBe` "Hello, world!"
+main = H.hspec $ do
+    H.describe "greet" $ do
+        H.it "greets by name" $
+            Lib1.greet "world" `H.shouldBe` "Hello, world!"
+
+    H.describe "withName" $ do
+        H.it "withName updates name" $
+            (Lib1.Person "Yan" 23 `Lib1.withName` "Yana") `H.shouldBe` Lib1.Person "Yana" 23

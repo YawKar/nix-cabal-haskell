@@ -41,6 +41,8 @@ library
   import:          common
   hs-source-dirs:  src
   exposed-modules: Lib1
+  build-depends:
+    optics-core  ^>=0.4
 
 test-suite lib1-test
   import:         common
